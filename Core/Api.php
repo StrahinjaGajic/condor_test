@@ -9,6 +9,10 @@ class Api
     {
         (new Header())->setHeader();
 
-        $router = new Core\Router();
+        $router = new Router();
+
+        $router->add('', ['controller' => 'home', 'action' => 'index']);
+
+        $router->dispatch($_SERVER['QUERY_STRING']);
     }
 }

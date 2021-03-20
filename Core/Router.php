@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use Core\Response\JSONResponse;
+
 /**
  *
  * Router
@@ -29,6 +31,68 @@ class Router
      */
     private $controllerName = '';
 
+
+    /**
+     * Get all the routes from the routing table
+     *
+     * @return array
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
+    }
+
+    /**
+     * Get the currently matched parameters
+     *
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->params;
+    }
+
+    /**
+     * Get the namespace for the controller class. The namespace defined in the
+     * route parameters is added if present.
+     *
+     * @return string The request URL
+     */
+    protected function getNamespace(): string
+    {
+        $namespace = 'App\Controllers\\';
+
+        if (array_key_exists('namespace', $this->params)) {
+            $namespace .= $this->params['namespace'] . '\\';
+        }
+        return $namespace;
+    }
+
+    /**
+     * @return void
+     */
+    private function setControllerNamespace(): void
+    {
+        $this->setControllerName($this->getNamespace() . $this->getControllerName());
+    }
+
+    /**
+     * @return string
+     */
+    private function getControllerName(): string
+    {
+        return $this->controllerName;
+    }
+
+    /**
+     * @param string $controller
+     * @return void
+     */
+    private function setControllerName(string $controller): void
+    {
+        $this->controllerName = $controller;
+    }
+
     /**
      * Add a route to the routing table
      *
@@ -53,17 +117,6 @@ class Router
 
         $this->routes[$route] = $params;
     }
-
-    /**
-     * Get all the routes from the routing table
-     *
-     * @return array
-     */
-    public function getRoutes()
-    {
-        return $this->routes;
-    }
-
     /**
      * Dispatch the route, creating the controller object and running the
      * action method
@@ -71,14 +124,14 @@ class Router
      * @param string $url The route URL
      *
      * @throws \Exception
-     * @return void
+     * @return void|JSONResponse
      */
     public function dispatch($url)
     {
         $url = $this->removeQueryStringVariables($url);
 
         if (!$this->match($url)) {
-            JSONResponse::error('No route matched.', 404, $header = []);
+            new JSONResponse('Route not found', 404);
         }
 
         $this->setControllerName($this->params['controller']);
@@ -86,17 +139,16 @@ class Router
         $this->formatControllerName();
 
         if (!class_exists($this->getControllerName())) {
-            JSONResponse::error("Controller class $this->controllerName not found", 400, $header = []);
+            new JSONResponse('Action not allowed', 403);
+        }
+
+        $action = $this->convertToCamelCase($this->params['action']);
+
+        if (!preg_match('/action$/i', $action) == 0) {
+            new JSONResponse('Action not allowed', 403);
         }
 
         $controller_object = new ($this->getControllerName())($this->getParams());
-
-        $action = $this->params['action'];
-        $action = $this->convertToCamelCase($action);
-
-        if (!preg_match('/action$/i', $action) == 0) {
-            JSONResponse::error("Method $action in controller $this->controllerName cannot be called directly - remove the Action suffix to call this method", 400, $header = []);
-        }
 
         $controller_object->$action();
     }
@@ -126,7 +178,16 @@ class Router
      */
     protected function removeQueryStringVariables($url): string
     {
-        //Format url
+        if ($url != '') {
+            $parts = explode('&', $url, 2);
+
+            if (strpos($parts[0], '=') === false) {
+                $url = $parts[0];
+            } else {
+                $url = '';
+            }
+        }
+
         return $url;
     }
 
@@ -158,25 +219,12 @@ class Router
         return false;
     }
 
-    private function formatControllerName(): void
+    private function formatControllerName()
     {
-        $this->convertToStudlyCaps();
+        $controller = convertToStudlyCaps($this->getControllerName());
+        $this->setControllerName($controller);
         $this->addControllerSuffix();
         $this->setControllerNamespace();
-        $this->setControllerNamespace();
-    }
-
-    /**
-     * Convert the string with hyphens to StudlyCaps,
-     * e.g. post-authors => PostAuthors
-     *
-     * @return void
-     */
-    protected function convertToStudlyCaps(): void
-    {
-        $controller = str_replace(' ', '', ucwords(str_replace('-', ' ', $this->getControllerName())));
-
-        $this->setControllerName($controller);
     }
 
     /**
@@ -190,50 +238,6 @@ class Router
     }
 
     /**
-     * @return void
-     */
-    private function setControllerNamespace(): void
-    {
-        $this->setControllerName($this->getNamespace() . $this->getControllerName());
-    }
-
-    /**
-     * @param string $controller
-     * @return void
-     */
-    private function setControllerName(string $controller): void
-    {
-        $this->controllerName = $controller;
-    }
-
-    /**
-     * Get the namespace for the controller class. The namespace defined in the
-     * route parameters is added if present.
-     *
-     * @return string The request URL
-     */
-    protected function getNamespace(): string
-    {
-        //Check if namespace is defined in $this->>params, concatenate are return
-        return $this->getParams() . 'ControllerName';
-    }
-
-    /**
-     * Get the currently matched parameters
-     *
-     * @return array
-     */
-    public function getParams()
-    {
-        return $this->params;
-    }
-
-    private function getControllerName(): string
-    {
-        return $this->controllerName;
-    }
-
-    /**
      * Convert the string with hyphens to camelCase,
      * e.g. add-new => addNew
      *
@@ -243,6 +247,6 @@ class Router
      */
     protected function convertToCamelCase($string): string
     {
-        return lcfirst($this->convertToStudlyCaps($string));
+        return lcfirst(convertToStudlyCaps($string));
     }
 }
