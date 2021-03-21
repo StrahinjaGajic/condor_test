@@ -9,8 +9,8 @@ class JSONResponse extends Response
     /**
      * JSONResponse constructor.
      *
-     * @param $message
-     * @param $code
+     * @param string $message
+     * @param int $code
      * @param array $data
      * @param array $headers
      */

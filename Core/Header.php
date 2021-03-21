@@ -11,19 +11,23 @@ namespace Core;
 
 class Header
 {
-    public function __construct()
-    {
-        $this->setHeader();
-    }
-
     /**
      * @return void
      */
-    public function setHeader(): void
+    public function originHeaders(): void
     {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
         header('Access-Control-Max-Age: 1000');
         header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization');
+    }
+
+    /**
+     * @return void
+     */
+    public function JSONHeaders(): void
+    {
+        header('Content-type:application/json;charset=utf-8');
+        header("Cache-Control: no-transform,public,max-age=300,s-maxage=900");
     }
 }

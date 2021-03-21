@@ -26,7 +26,7 @@ class Error
     {
         //Log error
 
-        return new JSONResponse('Ups, no data for you!',500);
+        return new JSONResponse('Ups, error, no data for you!',500);
     }
 
     /**
@@ -40,6 +40,6 @@ class Error
     {
         //Log error
 
-        return new JSONResponse('Ups, no data for you!',500);
+        return new JSONResponse('Ups, exception, no data for you!',500);
     }
 }

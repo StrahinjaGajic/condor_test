@@ -2,6 +2,7 @@
 
 namespace Core;
 
+use App\Routes;
 use Core\Response\JSONResponse;
 
 /**
@@ -31,13 +32,18 @@ class Router
      */
     private $controllerName = '';
 
+    public function __construct()
+    {
+        (new Routes($this));
+        (new ValidateApiRequest($_REQUEST))->handle();
+    }
 
     /**
      * Get all the routes from the routing table
      *
      * @return array
      */
-    public function getRoutes()
+    protected function getRoutes(): array
     {
         return $this->routes;
     }
@@ -47,7 +53,7 @@ class Router
      *
      * @return array
      */
-    public function getParams()
+    protected function getParams(): array
     {
         return $this->params;
     }
@@ -58,7 +64,7 @@ class Router
      *
      * @return string The request URL
      */
-    protected function getNamespace(): string
+    private function getNamespace(): string
     {
         $namespace = 'App\Controllers\\';
 
@@ -101,7 +107,7 @@ class Router
      *
      * @return void
      */
-    public function add($route, $params = [])
+    final public function add($route, $params = []): void
     {
         // Convert the route to a regular expression: escape forward slashes
         $route = preg_replace('/\//', '\\/', $route);
@@ -121,12 +127,11 @@ class Router
      * Dispatch the route, creating the controller object and running the
      * action method
      *
-     * @param string $url The route URL
+     * @param string $url
      *
-     * @throws \Exception
      * @return void|JSONResponse
      */
-    public function dispatch($url)
+    final public function dispatch($url)
     {
         $url = $this->removeQueryStringVariables($url);
 
@@ -176,7 +181,7 @@ class Router
      *
      * @return string The URL with the query string variables removed
      */
-    protected function removeQueryStringVariables($url): string
+    private function removeQueryStringVariables($url): string
     {
         if ($url != '') {
             $parts = explode('&', $url, 2);
@@ -199,7 +204,7 @@ class Router
      *
      * @return boolean  true if a match found, false otherwise
      */
-    public function match($url)
+    private function match($url)
     {
         foreach ($this->routes as $route => $params) {
 
@@ -219,6 +224,9 @@ class Router
         return false;
     }
 
+    /**
+     * Format controller from url
+     */
     private function formatControllerName()
     {
         $controller = convertToStudlyCaps($this->getControllerName());
@@ -232,7 +240,7 @@ class Router
      *
      * @return void
      */
-    protected function addControllerSuffix(): void
+    private function addControllerSuffix(): void
     {
         $this->setControllerName($this->getControllerName() . 'Controller');
     }
@@ -245,7 +253,7 @@ class Router
      *
      * @return string
      */
-    protected function convertToCamelCase($string): string
+    private function convertToCamelCase($string): string
     {
         return lcfirst(convertToStudlyCaps($string));
     }
