@@ -39,9 +39,8 @@ class ValidateApiRequest
 
         $expire = $this->setTokenExpire($payload);
 
-        $this->compareRequestKeyWithPayloadKey($payloadApiKey, $requestApiKey);
-
-        $this->tokenExpired($expire);
+        $this->compareRequestKeyWithPayloadKey($payloadApiKey, $requestApiKey)
+            ->tokenExpired($expire);
     }
 
     /**
@@ -88,13 +87,15 @@ class ValidateApiRequest
     /**
      * @param $apiKey
      * @param $payloadApiKey
-     * @return void|JSONResponse
+     * @return self|JSONResponse
      */
     private function compareRequestKeyWithPayloadKey($apiKey, $payloadApiKey)
     {
         if ($apiKey !== $payloadApiKey) {
             new JSONResponse('Invalid request', 400);
         }
+
+        return $this;
     }
 
     /**

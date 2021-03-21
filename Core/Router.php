@@ -31,6 +31,11 @@ class Router
      */
     private $controllerName = '';
 
+    /**
+     * @var string $url
+     */
+    private $url;
+
     public function __construct()
     {
         (new Routes($this));
@@ -74,14 +79,6 @@ class Router
     }
 
     /**
-     * @return void
-     */
-    private function setControllerNamespace(): void
-    {
-        $this->setControllerName($this->getNamespace() . $this->getControllerName());
-    }
-
-    /**
      * @return string
      */
     private function getControllerName(): string
@@ -91,11 +88,13 @@ class Router
 
     /**
      * @param string $controller
-     * @return void
+     * @return self
      */
-    private function setControllerName(string $controller): void
+    private function setControllerName(string $controller): self
     {
         $this->controllerName = $controller;
+
+        return $this;
     }
 
     /**
@@ -132,15 +131,10 @@ class Router
      */
     final public function dispatch(string $url)
     {
-        $url = $this->removeQueryStringVariables($url);
-
-        if (!$this->match($url)) {
-            new JSONResponse('Route not found', 404);
-        }
-
-        $this->setControllerName($this->params['controller']);
-
-        $this->formatControllerName();
+        $this->removeQueryStringVariables($url)
+            ->match()
+            ->setControllerName($this->params['controller'])
+            ->formatControllerName();
 
         if (!class_exists($this->getControllerName())) {
             new JSONResponse('Action not allowed', 403);
@@ -178,9 +172,9 @@ class Router
      *
      * @param string $url The full URL
      *
-     * @return string The URL with the query string variables removed
+     * @return self
      */
-    private function removeQueryStringVariables(string $url): string
+    private function removeQueryStringVariables(string $url): self
     {
         if ($url != '') {
             $parts = explode('&', $url, 2);
@@ -192,35 +186,34 @@ class Router
             }
         }
 
-        return $url;
+        $this->url = $url;
+
+        return $this;
     }
 
     /**
      * Match the route to the routes in the routing table, setting the $params
      * property if a route is found.
      *
-     * @param string $url The route URL
-     *
-     * @return boolean  true if a match found, false otherwise
+     * @return self|JSONResponse
      */
-    private function match(string $url)
+    private function match()
     {
         foreach ($this->routes as $route => $params) {
 
-            if (preg_match($route, $url, $matches)) {
+            if (preg_match($route, $this->url, $matches)) {
                 // Get named capture group values
                 foreach ($matches as $key => $match) {
                     if (is_string($key)) {
                         $params[$key] = $match;
                     }
                 }
-
                 $this->params = $params;
-                return true;
+                return $this;
             }
         }
 
-        return false;
+        new JSONResponse('Route not found', 404);
     }
 
     /**
@@ -228,20 +221,21 @@ class Router
      */
     private function formatControllerName()
     {
-        $controller = convertToStudlyCaps($this->getControllerName());
-        $this->setControllerName($controller);
-        $this->addControllerSuffix();
-        $this->setControllerNamespace();
+        $this->convertControllerToStudlyCase()
+        ->addControllerSuffix()
+        ->setControllerNamespace();
     }
 
     /**
      * Add suffix to class
      *
-     * @return void
+     * @return self
      */
-    private function addControllerSuffix(): void
+    private function addControllerSuffix(): self
     {
         $this->setControllerName($this->getControllerName() . 'Controller');
+
+        return $this;
     }
 
     /**
@@ -255,5 +249,25 @@ class Router
     private function convertToCamelCase(string $value): string
     {
         return lcfirst(convertToStudlyCaps($value));
+    }
+
+    /**
+     * @inheritdoc from convertToStudlyCaps()
+     *
+     * @return self
+     */
+    private function convertControllerToStudlyCase(): self
+    {
+        $this->setControllerName(convertToStudlyCaps($this->getControllerName()));
+
+        return $this;
+    }
+
+    /**
+     * @return void
+     */
+    private function setControllerNamespace(): void
+    {
+        $this->setControllerName($this->getNamespace() . $this->getControllerName());
     }
 }

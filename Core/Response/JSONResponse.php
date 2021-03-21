@@ -2,8 +2,6 @@
 
 namespace Core\Response;
 
-use Core\Response\Response as Response;
-
 class JSONResponse extends Response
 {
     /**

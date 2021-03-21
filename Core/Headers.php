@@ -21,7 +21,7 @@ class Headers
     /**
      * @return void
      */
-    public function originHeaders(): void
+    private function originHeaders(): void
     {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -32,7 +32,7 @@ class Headers
     /**
      * @return void
      */
-    public function JSONHeaders(): void
+    private function JSONHeaders(): void
     {
         header('Content-type:application/json;charset=utf-8');
         header("Cache-Control: no-transform,public,max-age=300,s-maxage=900");
