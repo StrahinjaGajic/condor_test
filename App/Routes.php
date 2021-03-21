@@ -16,6 +16,9 @@ class Routes
     }
 
     /**
+     * Set needed routes for api
+     * Use route groups for encapsulation of routes
+     *
      * @return void
      */
     private function setRoutes(): void

@@ -9,8 +9,15 @@
 namespace Core;
 
 
-class Header
+class Headers
 {
+    public function __construct()
+    {
+        $this->originHeaders();
+
+        $this->JSONHeaders();
+    }
+
     /**
      * @return void
      */

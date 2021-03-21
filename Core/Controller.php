@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use Core\Response\JSONResponse;
+
 /**
  *
  * Base controller
@@ -47,7 +49,9 @@ abstract class Controller
                 $this->after();
             }
         } else {
-            throw new \Exception("Method $method not found in controller " . get_class($this));
+            //Log "Method $method not found in controller " . get_class($this)
+
+            new JSONResponse('Method not found', 400);
         }
     }
 

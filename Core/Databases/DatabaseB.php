@@ -38,7 +38,7 @@ class DatabaseB extends DB implements DBInterface
         ];
     }
 
-    public function getConf()
+    public function getConf(): array
     {
         return $this->conf;
     }

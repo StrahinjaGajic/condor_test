@@ -25,9 +25,9 @@ class DB
      * Create database instance
      *
      * Database connection details are taken from Config
-     * @param array $databaseCon
+     * @param array $databaseConf
      */
-    public function __construct(array $databaseCon)
+    public function __construct(array $databaseConf)
     {
         list(
             'host' => $host,
@@ -35,7 +35,7 @@ class DB
             'user' => $user,
             'password' => $password,
             'options' => $options
-        ) = $databaseCon;
+        ) = $databaseConf;
 
         $params = 'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8';
 

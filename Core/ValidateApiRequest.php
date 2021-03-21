@@ -18,6 +18,8 @@ class ValidateApiRequest
 
     /**
      * Validate request by key and token from user
+     *
+     * @return void|JSONResponse
      */
     public function handle()
     {
@@ -43,14 +45,14 @@ class ValidateApiRequest
     }
 
     /**
-     * Check if api key exists in database for that user, return true || JSONResponse
+     * Check if api key exists in database for that user, return void || JSONResponse
      *
      * @param string $apiKey
-     * @return bool|JSONResponse
+     * @return void|JSONResponse
      */
     private function matchKeyFromUser(string $apiKey)
     {
-        return true;
+        return;
     }
 
     /**
@@ -66,6 +68,8 @@ class ValidateApiRequest
                 'data'
             ];
         } catch (\Exception $exception) {
+            //Log exception
+
             new JSONResponse('Token not valid', 400);
         }
     }
@@ -94,7 +98,7 @@ class ValidateApiRequest
     }
 
     /**
-     * Check token !==0 and exp date < current time, return JSONResponse|void
+     * Check token !== 0 && exp date < current time, return JSONResponse|void
      * @param int $expire
      * @return JSONResponse|void
      */

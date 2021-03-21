@@ -6,11 +6,7 @@ class Api
 {
     public function __construct()
     {
-        $headers = new Header();
-
-        $headers->originHeaders();
-
-        $headers->JSONHeaders();
+        (new Headers());
 
         $router = new Router();
 

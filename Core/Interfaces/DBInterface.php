@@ -14,5 +14,5 @@ interface DBInterface
 {
     public static function getInstance(): DB;
     public function setConf();
-    public function getConf();
+    public function getConf(): array;
 }

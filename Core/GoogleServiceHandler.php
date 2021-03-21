@@ -11,10 +11,9 @@ class GoogleServiceHandler
     public function __construct()
     {
         //Example response
+        //Generate response based on service response
         $this->data = [
-            'error' => false,
-            'message' => '',
-            'data' => []
+
         ];
     }
 
@@ -28,12 +27,12 @@ class GoogleServiceHandler
     {
         $data = $service->getData();
 
-        array_push($this->data['data'], $data);
+        array_push($this->data, $data);
 
         return $this;
     }
 
-    public function getAggregatedData()
+    public function getAggregatedData(): array
     {
         return $this->data;
     }

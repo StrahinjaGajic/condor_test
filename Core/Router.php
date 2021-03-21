@@ -12,7 +12,6 @@ use Core\Response\JSONResponse;
  */
 class Router
 {
-
     /**
      * Associative array of routes (the routing table)
      * @var array
@@ -35,7 +34,7 @@ class Router
     public function __construct()
     {
         (new Routes($this));
-        (new ValidateApiRequest($_REQUEST))->handle();
+        (new ValidateApiRequest($_REQUEST));
     }
 
     /**
@@ -107,7 +106,7 @@ class Router
      *
      * @return void
      */
-    final public function add($route, $params = []): void
+    final public function add(string $route, $params = []): void
     {
         // Convert the route to a regular expression: escape forward slashes
         $route = preg_replace('/\//', '\\/', $route);
@@ -131,7 +130,7 @@ class Router
      *
      * @return void|JSONResponse
      */
-    final public function dispatch($url)
+    final public function dispatch(string $url)
     {
         $url = $this->removeQueryStringVariables($url);
 
@@ -181,7 +180,7 @@ class Router
      *
      * @return string The URL with the query string variables removed
      */
-    private function removeQueryStringVariables($url): string
+    private function removeQueryStringVariables(string $url): string
     {
         if ($url != '') {
             $parts = explode('&', $url, 2);
@@ -204,7 +203,7 @@ class Router
      *
      * @return boolean  true if a match found, false otherwise
      */
-    private function match($url)
+    private function match(string $url)
     {
         foreach ($this->routes as $route => $params) {
 
@@ -249,12 +248,12 @@ class Router
      * Convert the string with hyphens to camelCase,
      * e.g. add-new => addNew
      *
-     * @param string $string The string to convert
+     * @param string $value The string to convert
      *
      * @return string
      */
-    private function convertToCamelCase($string): string
+    private function convertToCamelCase(string $value): string
     {
-        return lcfirst(convertToStudlyCaps($string));
+        return lcfirst(convertToStudlyCaps($value));
     }
 }
